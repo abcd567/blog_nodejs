@@ -28,8 +28,34 @@ const getDetail = (id) =>
     author: 'zhangsan',
   });
 
+const newBlog = (blogdata) =>
+  /* blogdata 是个博客对象， 包含title， content ctime等属性 */
+  ({
+    id: 3,
+  });
+const updateBlog = (id, blogdata) => {
+  /*
+   * id 是更新博客的id
+   * blogdata 是个博客对象， 包含title， content ctime等属性 */
+  if (!id) {
+    return false;
+  }
+  return true;
+};
+
+const delBlog = (id) => {
+  /* id: 要删除的博客的id */
+  if (!id) {
+    return false;
+  }
+  return true;
+};
+
 
 module.exports = {
   getList,
   getDetail,
+  newBlog,
+  updateBlog,
+  delBlog,
 };
