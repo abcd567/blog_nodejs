@@ -1,5 +1,5 @@
 const { loginCheck } = require('../controller/user');
-const { SuccessModel, ErroModel } = require('../model/resModel');
+const { SuccessModel, ErrorModel } = require('../model/resModel');
 
 const handleUserRouter = (req, res) => {
   // 登陆
@@ -9,7 +9,7 @@ const handleUserRouter = (req, res) => {
     if (result) {
       return new SuccessModel('登陆成功');
     }
-    return new ErroModel('登陆失败');
+    return new ErrorModel('登陆失败');
   }
 };
 
