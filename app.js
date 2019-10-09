@@ -1,6 +1,10 @@
 const querystring = require('querystring');
 const handleBlogRouter = require('./src/route/blog');
 const handleUserRouter = require('./src/route/user');
+const { maxAge } = require('./src/config/cookieConfig');
+
+// 全局 session数据
+const SESSION_DATA = {};
 
 // 获取postdata
 const getPostData = (req) => {
@@ -41,7 +45,7 @@ const serverHandle = (req, res) => {
   // 解析cookie
   req.cookie = {};
   const cookieStr = req.headers.cookie || '';
-  cookieStr.replace('; ', ';').split(';').forEach(item => {
+  cookieStr.replace('; ', ';').split(';').forEach((item) => {
     if (!item) {
       return;
     }
@@ -52,6 +56,20 @@ const serverHandle = (req, res) => {
     req.cookie[key] = val;
   });
 
+  // 解析session
+  let needSetCookie = false;
+  let userId = req.cookie.userid;
+  if (userId) {
+    if (!SESSION_DATA[userId]) {
+      SESSION_DATA[userId] = {};
+    }
+  } else {
+    needSetCookie = true;
+    userId = `${Date.now()}_${Math.random()}`;
+    SESSION_DATA[userId] = {};
+  }
+  req.session = SESSION_DATA[userId];
+
   // 如果是post,解析postdata
   getPostData(req).then((postData) => {
     req.body = postData;
@@ -60,6 +78,9 @@ const serverHandle = (req, res) => {
     const blogResult = handleBlogRouter(req, res);
     if (blogResult) {
       blogResult.then((blogdata) => {
+        if (needSetCookie) {
+          res.setHeader('Set-Cookie', `userid=${userId}; path=/; max-age=${maxAge}; httpOnly`);
+        }
         res.end(
           JSON.stringify(blogdata),
         );
@@ -72,6 +93,9 @@ const serverHandle = (req, res) => {
     const userResult = handleUserRouter(req, res);
     if (userResult) {
       userResult.then((userData) => {
+        if (needSetCookie) {
+          res.setHeader('Set-Cookie', `userid=${userId}; path=/; max-age=${maxAge}; httpOnly`);
+        }
         res.end(
           JSON.stringify(userData),
         );
