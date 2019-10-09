@@ -38,6 +38,20 @@ const serverHandle = (req, res) => {
   // 解析query
   req.query = querystring.parse(req.url.split('?')[1]);
 
+  // 解析cookie
+  req.cookie = {};
+  const cookieStr = req.headers.cookie || '';
+  cookieStr.replace('; ', ';').split(';').forEach(item => {
+    if (!item) {
+      return;
+    }
+    const arr = item.split('=');
+    // 去掉空格，不然要用 [" username"]方式获取值
+    const key = arr[0].trim();
+    const val = arr[1].trim();
+    req.cookie[key] = val;
+  });
+
   // 如果是post,解析postdata
   getPostData(req).then((postData) => {
     req.body = postData;
