@@ -3,6 +3,7 @@ const handleBlogRouter = require('./src/route/blog');
 const handleUserRouter = require('./src/route/user');
 const { maxAge } = require('./src/config/cookieConfig');
 const { set, get } = require('./src/db/redis');
+const { access } = require('./src/utils/log');
 
 // 全局 session数据
 // const SESSION_DATA = {};
@@ -36,6 +37,9 @@ const getPostData = (req) => {
 
 
 const serverHandle = (req, res) => {
+  // 记录日志
+  access(`${req.method} -- ${req.url} -- ${req.headers['user-agent']} -- ${Date.now()}`)
+
   req.path = req.url.split('?')[0];
 
   res.setHeader('Content-Type', 'application/json');
