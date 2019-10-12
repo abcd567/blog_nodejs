@@ -3,14 +3,14 @@ const path = require('path');
 
 // 写日志
 function writeLog(writeStream, log) {
-  writeStream.write(log + '\n');
+  writeStream.write(`${log}\n`);
 }
 
 // 生成write stream
 function createWriteStream(fileName) {
   const fullFileName = path.join(__dirname, '../', '../', 'logs', fileName);
   const writeStream = fs.createWriteStream(fullFileName, {
-    flags: 'a'
+    flags: 'a',
   });
   return writeStream;
 }
@@ -23,5 +23,5 @@ function access(log) {
 }
 
 module.exports = {
-  access
+  access,
 };

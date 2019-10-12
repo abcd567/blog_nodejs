@@ -17,7 +17,7 @@ const handleBlogRouter = (req, res) => {
   // 获取博客列表
   if (req.method === 'GET' && req.path === '/api/blog/list') {
     let author = req.query.author || '';
-    const keyword = req.query.keyword || '';
+    let keyword = req.query.keyword || '';
 
     if (req.query.isadmin) {
       // 管理员界面

@@ -1,8 +1,9 @@
+const xss = require('xss');
 const { exec, escape } = require('../db/mysql');
 
 const getList = (author, keyword) => {
   /* 获取数据库博客列表 */
-  //keyword = escape(`%${keyword}%`);
+  // keyword = escape(`%${keyword}%`);
 
   let sql = 'select * from blogs where 1=1 ';
   if (author) {
@@ -11,7 +12,7 @@ const getList = (author, keyword) => {
   }
   if (keyword) {
     keyword = escape(`%${keyword}%`);
-    sql += `and title like ${ keyword } `;
+    sql += `and title like ${keyword} `;
   }
   sql += 'order by ctime desc;';
   //console.log(sql);
@@ -19,8 +20,8 @@ const getList = (author, keyword) => {
 };
 
 
-const getDetail = (id) => {
-  id = escape(id);
+const getDetail = (articleId) => {
+  const id = escape(articleId);
   const sql = `select * from blogs where id=${id};`;
   return exec(sql).then((rows) => rows[0]);
 };
@@ -28,8 +29,13 @@ const getDetail = (id) => {
 
 const newBlog = (blogdata) => {
   /* blogdata 是个博客对象， 包含title， content ctime等属性 */
-  const { title, content, author } = blogdata;
+  let { title, content, author } = blogdata;
   const ctime = Date.now();
+  // 预防xss攻击
+  title = xss(title);
+  content = xss(content);
+  author = xss(author);
+  // 预防sql注入
   title = escape(title);
   content = escape(content);
   author = escape(author);
@@ -38,22 +44,26 @@ const newBlog = (blogdata) => {
       insert into blogs (title, content, author, ctime)
       values (${title}, ${content}, ${author}, ${ctime});
   `;
-  return exec(sql).then((insertData) =>
+  return exec(sql).then((insertData) => ({
     // console.log('insertData is :\n', insertData);
-    ({
-      id: insertData.insertId,
-    }));
+    id: insertData.insertId,
+  }));
 };
 
-const updateBlog = (id, blogdata) => {
+const updateBlog = (articleId, blogdata) => {
   /*
    * id 是更新博客的id
    * blogdata 是个博客对象， 包含title， content ctime等属性 */
-  const { title, content, author } = blogdata;
+  let { title, content, author } = blogdata;
+  // 预防xss攻击
+  title = xss(title);
+  content = xss(content);
+  author = xss(author);
+  // 预防sql注入
   title = escape(title);
   content = escape(content);
   author = escape(author);
-  id = escape(id);
+  const id = escape(articleId);
 
   const sql = `
     update blogs set title=${title}, content=${content} where id=${id} and author=${author};
@@ -68,11 +78,11 @@ const updateBlog = (id, blogdata) => {
   });
 };
 
-const delBlog = (id, blogdata) => {
+const delBlog = (articleId, blogdata) => {
   /* id: 要删除的博客的id */
-  const { author } = blogdata;
+  let { author } = blogdata;
   author = escape(author);
-  id = escape(id);
+  const id = escape(articleId);
 
   const sql = `
     delete from blogs where id=${id} and author=${author};
